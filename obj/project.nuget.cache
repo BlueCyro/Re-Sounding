@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "dgSpecHash": "q0Kur3LJha3nE/01QxFYVmhvjCEBgsxu1gnwiHha9TRBpoTuJTXk551TYzmTB6FOHj8sekvppuE8uWIRWBDPBg==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Cyro\\Documents\\Coding Stuff\\Cyro Libraries\\Re-Sounding\\Re-Sounding.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Cyro\\.nuget\\packages\\system.buffers\\4.5.1\\system.buffers.4.5.1.nupkg.sha512",
+    "C:\\Users\\Cyro\\.nuget\\packages\\system.collections.immutable\\8.0.0\\system.collections.immutable.8.0.0.nupkg.sha512",
+    "C:\\Users\\Cyro\\.nuget\\packages\\system.memory\\4.5.5\\system.memory.4.5.5.nupkg.sha512",
+    "C:\\Users\\Cyro\\.nuget\\packages\\system.numerics.vectors\\4.5.0\\system.numerics.vectors.4.5.0.nupkg.sha512",
+    "C:\\Users\\Cyro\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\6.0.0\\system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
