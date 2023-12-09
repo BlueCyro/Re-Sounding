@@ -60,6 +60,7 @@ public static class MyConversions
     // Define conversion method, convert to your data type how you desire. Function can be named anything.
     public MyDataType Convert(object[] data)
     {
+        // Make sure the data array contains the types you actually want!! Otherwise this will fail.
         return new() { FirstInt = data[0], SecondFloat = data[1], ThirdBool = data[2] }
     }
 }
