@@ -3,9 +3,9 @@ namespace ReSounding;
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 public class OSCMapAttribute : Attribute
 {
-    public OSCMapAttribute(string path)
+    public OSCMapAttribute(params string[] paths)
     {
-        Path = path;
+        Paths = paths;
     }
-    public readonly string Path;
+    public readonly string[] Paths;
 }

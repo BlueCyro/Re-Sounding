@@ -9,13 +9,13 @@ public static class OSCMapper
     // Concurrent dictionary since we do lazy caching for the OSC lookups that needs to be thread safe
     private static readonly ConcurrentDictionary<Type, FrozenDictionary<string, Action<object, object[]>>> fieldCaches = new();
 
-    // Scan T for conversion methods. Methods must have only 1 parameter of type object[]
+    // Converter method lookup. Immutable for lookup efficiency.
     private static FrozenDictionary<Type, MethodInfo>? converters;
 
     /// <summary>
-    /// Registers a class of converters for custom type interpretations.
+    /// Registers a class of converters for custom type interpretations. Converters must contain one parameter of type 'object[]'
     /// </summary>
-    /// <param name="t"></param>
+    /// <param name="t">The type to search for converters.</param>
     public static void RegisterConverters(Type t)
     {
         converters = t
@@ -27,10 +27,11 @@ public static class OSCMapper
     /// <summary>
     /// Attempts to map an OSC message's arguments onto a class by OSC address.
     /// </summary>
-    /// <param name="obj"></param>
-    /// <param name="address"></param>
-    /// <param name="data"></param>
-    /// <returns></returns>
+    /// <param name="obj">The object to map onto</param>
+    /// <param name="address">The address on which to map the data</param>
+    /// <param name="data">The data to map onto the object</param>
+    /// <returns>Whether the mapping was successful</returns>
+    /// <exception cref="InvalidCastException">Thrown if any type in the data mismatches its destination</exception>
     public static bool TryMapOSC(object obj, string address, params object[] data)
     {
         Type objType = obj.GetType();
@@ -42,7 +43,8 @@ public static class OSCMapper
             lookup = objType.GetMembers(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic) // Get the members
                 .Select(mbr => (mbr, attr: mbr.GetCustomAttribute<OSCMapAttribute>())) // Get the attribute & pass it along
                 .Where(m => m.attr != null)                                            // Make sure the attribute isn't null
-                .ToFrozenDictionary(a => a.attr!.Path, a => MapMember(a.mbr));         // Store the lookup in a frozen dict for efficiency
+                .SelectMany(m => m.attr.Paths.Select(p => (m.mbr, path: p)))
+                .ToFrozenDictionary(a => a.path, a => MapMember(a.mbr));               // Store the lookup in a frozen dict for efficiency
             
             fieldCaches.TryAdd(objType, lookup);                                       // Add the lookup to the type lookup dict
         }
@@ -59,8 +61,8 @@ public static class OSCMapper
     /// Takes either a field or a property member and creates an accessor delegate for it.
     /// </summary>
     /// <param name="member"></param>
-    /// <returns></returns>
-    /// <exception cref="NullReferenceException"></exception>
+    /// <returns>An accessor delegate for a field or property member on a type</returns>
+    /// <exception cref="NullReferenceException">Thrown when MapMember() is passed an incompatible member type.</exception>
     internal static Action<object, object[]> MapMember(MemberInfo member)
     {
         // Ensure that the member is actually a property or a field
@@ -76,7 +78,8 @@ public static class OSCMapper
         var obj = Expression.Parameter(typeof(object[]), "object");
 
 
-        var targCasted = Expression.Convert(targ, member.DeclaringType); // Cast "target" to the declaring type since we know it
+        // Cast "target" to the declaring type since we know it
+        var targCasted = Expression.Convert(targ, member.DeclaringType);
         
         MethodInfo? conv = null;
         converters?.TryGetValue(memberType, out conv); // Try to get a converter
